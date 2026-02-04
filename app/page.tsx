@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useRef, useState, useMemo } from "react";
-import { useReactToPrint } from "react-to-print";
+import React, { useRef, useState } from "react";
 import {
   Phone,
   Mail,
@@ -10,27 +10,17 @@ import {
   Globe,
   Download,
   Upload,
-  ExternalLink,
   Calendar,
-  Briefcase,
+  Loader2,
 } from "lucide-react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas-pro";
 
-// --- Types ---
-interface Project {
-  name: string;
-  period: string;
-  location?: string;
-  link?: string;
-  subtitle?: string;
-  details: string[];
-}
-
-// --- Main Component ---
 export default function ResumeBuilder() {
   const componentRef = useRef<HTMLDivElement>(null);
   const [profileImg, setProfileImg] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
-  // --- State Initialization with your provided data ---
   const [data, setData] = useState({
     name: "SAMIUL ISLAM",
     title: "Experienced Backend & Full Stack Developer",
@@ -65,156 +55,153 @@ export default function ResumeBuilder() {
       "Large-scale data management",
       "Agile Methodologies",
     ],
-    experience: [
-      {
-        title: "Full Stack Developer",
-        company: "Aimsbay IT Solutions",
-        period: "03/2025 - Present",
-        bullets: [
-          "Contributed as a full-stack developer.",
-          "Developed and delivered multiple frontend and backend products.",
-        ],
-      },
-      {
-        title: "Back End Developer",
-        company: "Gain Solutions Ltd",
-        period: "03/2020 - 01/2025",
-        bullets: [
-          "Developed and optimized backend services to improve performance.",
-          "Worked on key modules, API integrations, and system enhancements.",
-          "Collaborated closely with frontend teams to ensure seamless API consumption.",
-        ],
-      },
-      {
-        title: "Full Stack Developer",
-        company: "Gain Solutions Ltd",
-        period: "01/2019 - 03/2020",
-        description:
-          "Gain Solutions Ltd provides various software solutions with a focus on high-performance applications.",
-        bullets: [
-          "Contributed as a full-stack developer in a large team.",
-          "Developed and maintained core functionalities of the platform.",
-        ],
-      },
-      {
-        title: "Team Lead",
-        company: "Gain Solutions Ltd",
-        period: "02/2023 - 01/2024",
-        bullets: [
-          "Led backend development team, including database design and optimization.",
-          "Developed key modules such as Leave, Timeline, Large-Scale Data Importing, and Third-Party API Integrations.",
-          "Focused on high-performance architecture and system scalability.",
-        ],
-      },
-    ],
-    projects: [
-      {
-        name: "Payrun",
-        period: "09/2023 - 01/2025",
-        location: "Gain Solutions Ltd",
-        link: "https://local.payrun.app/",
-        subtitle: "Modern HRM Application",
-        details: [
-          "Role: Senior Backend Developer",
-          "Technologies: Node.js, Express.js, GraphQL, PostgreSQL, Sequelize ORM, AWS Services",
-          "Led backend development, including database design and optimization.",
-          "Developed key modules such as Leave, Timeline, Large-Scale Data Importing, and Third-Party API Integrations.",
-          "Focused on high-performance architecture and system scalability.",
-        ],
-      },
-      {
-        name: "Easydesk",
-        period: "09/2023 - 01/2025",
-        location: "Gain Solutions Ltd",
-        subtitle: "Smart, Scalable Ticketing Solution",
-        details: [
-          "Role: Senior Backend Developer",
-          "Technologies: Node.js, Express.js, GraphQL, PostgreSQL, Sequelize ORM, AWS Services",
-          "Integrated with third party APIs and customized modules.",
-        ],
-      },
-      {
-        name: "UniteLiving.com (Version 2)",
-        period: "03/2023 - 08/2024",
-        location: "Gain Solutions Ltd",
-        link: "https://uniteliving.com/",
-        details: [
-          "Contributed as a backend developer in a large team.",
-          "Developed and maintained core functionalities of the platform.",
-          "Optimized backend services to improve performance.",
-          "Worked on key modules, Database design, API integrations, and system enhancements.",
-        ],
-      },
-      {
-        name: "UniteLiving Partners App (Norwegian DTMS App) - Version 2",
-        period: "03/2020 - 08/2023",
-        location: "Gain Solutions Ltd",
-        link: "https://krogesveen.local.uniteliving.com/",
-        details: [
-          "Contributed as a backend developer in a large team.",
-          "Developed and maintained core functionalities of the platform.",
-          "Worked on key modules, Database design, API integrations, and system enhancements.",
-        ],
-      },
-      {
-        name: "UniteLiving (Version 1)",
-        period: "01/2019 - 03/2020",
-        location: "Gain Solutions Ltd",
-        details: [
-          "Developed and maintained core functionalities of the platform.",
-          "Contributed as a full-stack developer in a large team.",
-        ],
-      },
-      {
-        name: "UniteLiving Partners App (Norwegian DTMS App) - Version 1",
-        period: "01/2019 - 03/2020",
-        location: "Gain Solutions Ltd",
-        details: [
-          "Developed and maintained core functionalities of the platform.",
-          "Contributed as a full-stack developer in a large team.",
-          "Built and maintained key features for the partner application.",
-        ],
-      },
-      {
-        name: "Personal Project: AI-SmartSiteSense",
-        period: "RAG Application",
-        link: "https://ai-smart-site-sense-bgrn.vercel.app/",
-        details: [
-          "An AI-powered web tool that extracts and analyzes webpage content, allowing users to ask questions and get intelligent answers.",
-          "Technologies: next.js, upstash/rag-chat, upstash/vector, upstash/redis, ai, tailwind css.",
-        ],
-      },
-      {
-        name: "Personal Project: Medico",
-        period: "React.js, Next.js",
-        link: "https://github.com/saad85/Medico",
-        details: [
-          "Doctor Appointment booking app. Medico provides users to book an appointment with their desired doctor by searching by name.",
-        ],
-      },
-    ],
   });
 
-  // --- Handlers ---
-  const handlePrint = useReactToPrint({
-    contentRef: componentRef,
-    documentTitle: `${data.name}_Resume`,
-  });
+  // All 8 Projects Data
+  const projects = [
+    {
+      name: "Payrun",
+      period: "09/2023 - 01/2025",
+      link: "https://local.payrun.app/",
+      subtitle: "Modern HRM Application",
+      details: [
+        "Role: Senior Backend Developer",
+        "Technologies: Node.js, Express.js, GraphQL, PostgreSQL, Sequelize ORM, AWS Services",
+        "Led backend development, database design and optimization.",
+        "Developed key modules: Leave, Timeline, Large-Scale Data Importing.",
+      ],
+    },
+    {
+      name: "Easydesk",
+      period: "09/2023 - 01/2025",
+      subtitle: "Smart, Scalable Ticketing Solution",
+      details: [
+        "Role: Senior Backend Developer",
+        "Technologies: Node.js, Express.js, GraphQL, PostgreSQL, Sequelize ORM, AWS Services",
+        "Integrated with third party APIs and customized modules.",
+      ],
+    },
+    {
+      name: "UniteLiving.com (Version 2)",
+      period: "03/2023 - 08/2024",
+      link: "https://uniteliving.com/",
+      details: [
+        "Contributed as a backend developer in a large team.",
+        "Developed and maintained core functionalities.",
+        "Worked on Database design and API integrations.",
+      ],
+    },
+    {
+      name: "UniteLiving Partners App - Version 2",
+      period: "03/2020 - 08/2023",
+      link: "https://krogesveen.local.uniteliving.com/",
+      subtitle: "Norwegian DTMS App",
+      details: [
+        "Developed and maintained core functionalities.",
+        "Worked on key modules, Database design, and system enhancements.",
+      ],
+    },
+    {
+      name: "UniteLiving (Version 1)",
+      period: "01/2019 - 03/2020",
+      details: [
+        "Developed and maintained core functionalities.",
+        "Contributed as a full-stack developer in a large team.",
+      ],
+    },
+    {
+      name: "UniteLiving Partners App - Version 1",
+      period: "01/2019 - 03/2020",
+      details: [
+        "Developed and maintained core functionalities.",
+        "Built and maintained key features for the partner application.",
+      ],
+    },
+    {
+      name: "Personal Project: AI-SmartSiteSense",
+      period: "RAG Application",
+      link: "https://ai-smart-site-sense-bgrn.vercel.app/",
+      details: [
+        "AI-powered tool that extracts and analyzes webpage content.",
+        "Technologies: next.js, upstash/rag-chat, upstash/vector, upstash/redis, ai, tailwind css.",
+      ],
+    },
+    {
+      name: "Personal Project: Medico",
+      period: "React.js, Next.js",
+      link: "https://github.com/saad85/Medico",
+      details: [
+        "Doctor Appointment booking app. Medico provides users to book an appointment with their desired doctor.",
+      ],
+    },
+  ];
 
-  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setProfileImg(reader.result as string);
-      reader.readAsDataURL(file);
+  const experience = [
+    {
+      title: "Full Stack Developer",
+      company: "Aimsbay IT Solutions",
+      period: "03/2025 - Present",
+      bullets: [
+        "Contributed as a full-stack developer.",
+        "Developed and delivered multiple frontend and backend products.",
+      ],
+    },
+    {
+      title: "Back End Developer",
+      company: "Gain Solutions Ltd",
+      period: "03/2020 - 01/2025",
+      bullets: [
+        "Developed and optimized backend services.",
+        "Worked on key modules and system enhancements.",
+      ],
+    },
+    {
+      title: "Team Lead",
+      company: "Gain Solutions Ltd",
+      period: "02/2023 - 01/2024",
+      bullets: [
+        "Led backend development team.",
+        "Focused on high-performance architecture and scalability.",
+      ],
+    },
+  ];
+
+  const downloadPDF = async () => {
+    if (!componentRef.current) return;
+    setIsDownloading(true);
+
+    try {
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pages = componentRef.current.querySelectorAll(".a4-page");
+
+      for (let i = 0; i < pages.length; i++) {
+        const canvas = await html2canvas(pages[i] as HTMLElement, {
+          scale: 3,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: "#ffffff",
+          width: 794, // Fixed A4 width in pixels at 96 DPI
+          height: 1123,
+        });
+
+        const imgData = canvas.toDataURL("image/png");
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, 0, 210, 297);
+      }
+
+      pdf.save(`${data.name.replace(/\s+/g, "_")}_Resume.pdf`);
+    } catch (error) {
+      console.error(error);
+      alert("Download failed. Check console.");
+    } finally {
+      setIsDownloading(false);
     }
   };
 
   const renderRichText = (text: string) => {
-    const parts = text.split(/(\*\*.*?\*\*)/g);
-    return parts.map((part, i) =>
+    return text.split(/(\*\*.*?\*\*)/g).map((part, i) =>
       part.startsWith("**") && part.endsWith("**") ? (
-        <strong key={i} className="font-bold text-black">
+        <strong key={i} style={{ color: "#000", fontWeight: 800 }}>
           {part.slice(2, -2)}
         </strong>
       ) : (
@@ -223,130 +210,111 @@ export default function ResumeBuilder() {
     );
   };
 
-  // Logic to split projects between pages
-  const page1Projects = data.projects.slice(0, 3);
-  const page2Projects = data.projects.slice(3);
-
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-zinc-900 text-white font-sans">
-      {/* SIDEBAR EDITOR */}
-      <aside className="w-full lg:w-96 p-6 border-r border-zinc-700 overflow-y-auto max-h-screen no-scrollbar print:hidden">
-        <div className="sticky top-0 bg-zinc-900 pb-4 mb-6 border-b border-zinc-700 z-10">
-          <h2 className="text-xl font-bold mb-4">Resume Editor</h2>
-          <button
-            onClick={handlePrint}
-            className="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-lg flex items-center justify-center gap-2 font-bold transition-all shadow-lg"
-          >
-            <Download size={20} /> Download PDF
-          </button>
-        </div>
+    <div className="flex flex-col lg:flex-row min-h-screen bg-zinc-950 text-white font-sans">
+      {/* SIDEBAR */}
+      <aside className="w-full lg:w-80 p-6 border-r border-zinc-800 bg-zinc-900 overflow-y-auto no-scrollbar">
+        <h2 className="text-xl font-bold mb-6 border-b border-zinc-700 pb-2 uppercase tracking-tighter">
+          Editor
+        </h2>
 
-        <div className="space-y-6">
-          <section>
-            <label className="text-xs uppercase font-bold text-zinc-500 block mb-2 tracking-widest">
-              Profile Photo
-            </label>
-            <div className="relative group">
-              <input
-                type="file"
-                onChange={handleImage}
-                className="absolute inset-0 opacity-0 cursor-pointer z-10"
-              />
-              <div className="h-20 border-2 border-dashed border-zinc-700 rounded-lg flex items-center justify-center group-hover:border-blue-500 transition-colors">
-                <Upload
-                  size={24}
-                  className="text-zinc-500 group-hover:text-blue-500"
-                />
-              </div>
-            </div>
-          </section>
+        <button
+          onClick={downloadPDF}
+          disabled={isDownloading}
+          className="w-full mb-8 bg-blue-600 hover:bg-blue-700 py-3 rounded-lg flex items-center justify-center gap-2 font-bold transition-all shadow-xl disabled:opacity-50"
+        >
+          {isDownloading ? (
+            <Loader2 className="animate-spin" />
+          ) : (
+            <Download size={20} />
+          )}
+          {isDownloading ? "Processing..." : "Download PDF"}
+        </button>
 
-          <section className="space-y-3">
-            <label className="text-xs uppercase font-bold text-zinc-500 block tracking-widest">
-              General Info
-            </label>
-            <input
-              value={data.name}
-              onChange={(e) => setData({ ...data, name: e.target.value })}
-              placeholder="Name"
-              className="editor-input"
-            />
-            <input
-              value={data.title}
-              onChange={(e) => setData({ ...data, title: e.target.value })}
-              placeholder="Title"
-              className="editor-input"
-            />
-            <textarea
-              value={data.summary}
-              onChange={(e) => setData({ ...data, summary: e.target.value })}
-              rows={5}
-              placeholder="Summary"
-              className="editor-input"
-            />
-          </section>
+        <div className="space-y-4">
+          <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+            Profile Image
+          </label>
+          <input
+            type="file"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = (re) =>
+                  setProfileImg(re.target?.result as string);
+                reader.readAsDataURL(file);
+              }
+            }}
+            className="w-full text-xs text-zinc-400 file:bg-zinc-800 file:border-0 file:text-white file:px-3 file:py-1 file:rounded cursor-pointer"
+          />
 
-          <p className="text-xs text-zinc-500 italic">
-            Live editing is enabled for Name, Title, and Summary. Data for other
-            sections is pre-loaded from your request.
-          </p>
+          <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block mt-4">
+            Summary Editor
+          </label>
+          <textarea
+            value={data.summary}
+            onChange={(e) => setData({ ...data, summary: e.target.value })}
+            rows={8}
+            className="w-full bg-zinc-800 border border-zinc-700 p-2 text-sm rounded outline-none focus:border-blue-500"
+          />
         </div>
       </aside>
 
-      {/* A4 PREVIEW CONTAINER */}
-      <main className="flex-1 bg-zinc-200 overflow-y-auto h-screen p-8 flex flex-col items-center gap-8">
-        <div ref={componentRef} className="print:m-0">
-          {/* --- PAGE 1 --- */}
-          <div className="a4-page shadow-2xl relative">
-            {/* Header Section */}
-            <header className="bg-slate-50 p-10 flex justify-between items-start border-b-2 border-slate-200 overflow-hidden">
+      {/* PREVIEW AREA */}
+      <main className="flex-1 bg-zinc-800 p-8 overflow-y-auto flex flex-col items-center">
+        <div ref={componentRef} className="flex flex-col gap-0">
+          {/* PAGE 1 */}
+          <div className="a4-page bg-white text-gray-800 shadow-2xl flex flex-col">
+            <header className="bg-slate-50 p-10 flex justify-between items-start border-b-2 border-slate-200">
               <div className="flex-1">
-                <h1 className="text-4xl font-extrabold text-black tracking-tighter">
+                <h1 className="text-4xl font-[900] text-black tracking-tight">
                   {data.name}
                 </h1>
-                <p className="text-[#0070f3] text-xl font-bold mt-1 uppercase tracking-wider">
+                <p
+                  style={{ color: "#0070f3" }}
+                  className="text-xl font-extrabold mt-1 uppercase tracking-wider"
+                >
                   {data.title}
                 </p>
 
-                <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 mt-5 text-[9.5pt] text-gray-700">
-                  <div className="flex items-center gap-2 font-medium">
-                    <Phone size={13} className="text-[#0070f3]" /> {data.phone}
-                  </div>
-                  <div className="flex items-center gap-2 font-medium">
-                    <Mail size={13} className="text-[#0070f3]" /> {data.email}
-                  </div>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2 mt-6 text-[9.5pt] text-gray-600">
+                  <span className="flex items-center gap-2">
+                    <Phone size={12} style={{ color: "#0070f3" }} />{" "}
+                    {data.phone}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Mail size={12} style={{ color: "#0070f3" }} /> {data.email}
+                  </span>
                   <a
                     href={data.linkedin}
                     target="_blank"
-                    className="flex items-center gap-2 font-bold text-blue-600 hover:underline"
+                    className="text-blue-600 font-bold underline"
                   >
-                    <Linkedin size={13} /> LinkedIn
+                    <Linkedin size={12} /> LinkedIn
                   </a>
-                  <div className="flex items-center gap-2 font-medium">
-                    <MapPin size={13} className="text-[#0070f3]" />{" "}
+                  <span className="flex items-center gap-2">
+                    <MapPin size={12} style={{ color: "#0070f3" }} />{" "}
                     {data.location}
-                  </div>
-                  <div className="col-span-2 flex flex-col gap-1 mt-1">
-                    <a
-                      href={data.github1}
-                      target="_blank"
-                      className="flex items-center gap-2 text-blue-600 font-bold hover:underline text-[9pt]"
-                    >
-                      <Github size={13} /> {data.github1}
-                    </a>
-                    <a
-                      href={data.github2}
-                      target="_blank"
-                      className="flex items-center gap-2 text-blue-600 font-bold hover:underline text-[9pt]"
-                    >
-                      <Github size={13} /> {data.github2}
-                    </a>
-                  </div>
+                  </span>
+                  <a
+                    href={data.github1}
+                    target="_blank"
+                    className="text-blue-600 font-bold underline"
+                  >
+                    <Github size={12} /> {data.github1}
+                  </a>
+                  <a
+                    href={data.github2}
+                    target="_blank"
+                    className="text-blue-600 font-bold underline"
+                  >
+                    <Github size={12} /> {data.github2}
+                  </a>
                 </div>
               </div>
-
               {profileImg && (
-                <div className="w-36 h-36 rounded-full border-4 border-white shadow-xl overflow-hidden bg-slate-200 shrink-0 ml-6">
+                <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden shrink-0 ml-6">
                   <img
                     src={profileImg}
                     alt="Profile"
@@ -356,127 +324,105 @@ export default function ResumeBuilder() {
               )}
             </header>
 
-            {/* Main Content Body */}
-            <div className="p-10 grid grid-cols-12 gap-8 flex-1 bg-white">
-              {/* LEFT COLUMN */}
+            <div className="p-10 grid grid-cols-12 gap-8 flex-1">
+              {/* LEFT COL */}
               <div className="col-span-7 space-y-8">
                 <section>
-                  <h2 className="section-header">Summary</h2>
+                  <h2 className="section-title">Summary</h2>
                   <p className="text-[10pt] leading-relaxed text-gray-700 text-justify">
                     {renderRichText(data.summary)}
                   </p>
                 </section>
-
                 <section>
-                  <h2 className="section-header">Skills</h2>
+                  <h2 className="section-title">Skills</h2>
                   <div className="flex flex-wrap gap-2">
-                    {data.skills.map((skill, i) => (
-                      <span key={i} className="skill-pill">
-                        {skill}
+                    {data.skills.map((s, i) => (
+                      <span key={i} className="skill-tag">
+                        {s}
                       </span>
                     ))}
                   </div>
                 </section>
-
                 <section>
-                  <h2 className="section-header">Projects</h2>
-                  {page1Projects.map((proj, idx) => (
-                    <ProjectItem
-                      key={idx}
-                      project={proj}
-                      showDivider={idx < page1Projects.length - 1}
-                    />
+                  <h2 className="section-title">Projects</h2>
+                  {projects.slice(0, 3).map((p, i) => (
+                    <ProjectComp key={i} project={p} showDivider={i < 2} />
                   ))}
                 </section>
               </div>
 
-              {/* RIGHT COLUMN */}
-              <div className="col-span-5 space-y-8">
+              {/* RIGHT COL */}
+              <div className="col-span-5 space-y-8 border-l border-gray-100 pl-4">
                 <section>
-                  <h2 className="section-header">Experience</h2>
-                  {data.experience.map((exp, idx) => (
-                    <div key={idx} className="mb-6">
-                      <h3 className="text-lg font-bold text-gray-900 leading-tight">
+                  <h2 className="section-title">Experience</h2>
+                  {experience.map((exp, i) => (
+                    <div key={i} className="mb-6">
+                      <h3 className="text-lg font-bold text-black leading-tight">
                         {exp.title}
                       </h3>
-                      <p className="text-[#0070f3] font-extrabold text-[10pt] uppercase mb-1 tracking-tight">
+                      <p
+                        style={{ color: "#0070f3" }}
+                        className="font-black text-[10pt] uppercase mb-1"
+                      >
                         {exp.company}
                       </p>
-                      <p className="text-[9pt] font-bold text-gray-400 mb-2 flex items-center gap-1">
-                        <Calendar size={12} /> {exp.period}
+                      <p className="text-[8.5pt] font-bold text-gray-400 mb-2 italic">
+                        📅 {exp.period}
                       </p>
-                      <ul className="list-disc ml-4 text-[9.5pt] space-y-1 text-gray-700 leading-snug">
-                        {exp.bullets.map((b, bIdx) => (
-                          <li key={bIdx}>{b}</li>
+                      <ul className="list-disc ml-4 text-[9.5pt] space-y-1 text-gray-700">
+                        {exp.bullets.map((b, bi) => (
+                          <li key={bi}>{b}</li>
                         ))}
                       </ul>
-                      {idx < data.experience.length - 1 && (
-                        <div className="mt-4 border-b border-dotted border-gray-300" />
+                      {i < experience.length - 1 && (
+                        <div className="mt-4 border-b border-dotted border-gray-200" />
                       )}
                     </div>
                   ))}
                 </section>
-
                 <section>
-                  <h2 className="section-header">Education</h2>
-                  <div>
-                    <h3 className="font-bold text-gray-900 leading-tight">
-                      Bachelor of Computer Science and Engineering
-                    </h3>
-                    <p className="text-[#0070f3] font-bold text-[10pt] mt-1">
-                      Ahsanullah University of Science and Technology
-                    </p>
-                    <p className="text-[9pt] font-bold text-gray-400 mt-1">
-                      📅 11/2013 - 05/2018
-                    </p>
-                  </div>
+                  <h2 className="section-title">Education</h2>
+                  <h3 className="font-bold text-black text-[10pt]">
+                    Bachelor of CSE
+                  </h3>
+                  <p
+                    style={{ color: "#0070f3" }}
+                    className="font-bold text-[9pt]"
+                  >
+                    Ahsanullah University of Science and Tech
+                  </p>
+                  <p className="text-[8pt] font-bold text-gray-400">
+                    📅 11/2013 - 05/2018
+                  </p>
                 </section>
               </div>
             </div>
-
-            <footer className="footer-bar">
-              <span>www.enhancv.com</span>
-              <span className="flex items-center gap-1 italic">
-                Powered by <span className="font-bold not-italic">Enhancv</span>
-              </span>
-            </footer>
           </div>
 
-          {/* --- PAGE 2 --- */}
-          <div className="a4-page shadow-2xl mt-8 bg-white p-10 flex flex-col">
-            <h2 className="section-header">Projects (Continued)</h2>
-            <div className="grid grid-cols-12 gap-8 flex-1">
-              <div className="col-span-12 space-y-6">
-                {page2Projects.map((proj, idx) => (
-                  <ProjectItem
-                    key={idx}
-                    project={proj}
-                    showDivider={idx < page2Projects.length - 1}
-                  />
-                ))}
-              </div>
+          {/* PAGE 2 */}
+          <div className="a4-page bg-white text-gray-800 p-10 flex flex-col">
+            <h2 className="section-title">Projects (Continued)</h2>
+            <div className="space-y-6">
+              {projects.slice(3).map((p, i) => (
+                <ProjectComp
+                  key={i}
+                  project={p}
+                  showDivider={i < projects.slice(3).length - 1}
+                />
+              ))}
             </div>
-            <footer className="footer-bar mt-auto">
-              <span>www.enhancv.com</span>
-              <span className="flex items-center gap-1 italic">
-                Powered by <span className="font-bold not-italic">Enhancv</span>
-              </span>
-            </footer>
           </div>
         </div>
       </main>
 
       <style jsx global>{`
         .a4-page {
-          width: 210mm;
-          min-height: 297mm;
-          background: white;
-          color: #333;
+          width: 794px;
+          height: 1123px;
           overflow: hidden;
-          display: flex;
-          flex-direction: column;
+          page-break-after: always;
         }
-        .section-header {
+        .section-title {
           font-size: 1.25rem;
           font-weight: 900;
           text-transform: uppercase;
@@ -484,110 +430,59 @@ export default function ResumeBuilder() {
           border-bottom: 3px solid #000;
           padding-bottom: 4px;
           margin-bottom: 1rem;
-          letter-spacing: 0.05em;
         }
-        .skill-pill {
+        .skill-tag {
           padding: 3px 10px;
           background: #fff;
           border: 1px solid #e2e8f0;
           border-bottom: 2.5px solid #0070f3;
-          color: #1a202c;
+          color: #000;
           font-size: 8.5pt;
-          font-weight: 700;
+          font-weight: 800;
           border-radius: 4px;
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        }
-        .footer-bar {
-          padding: 12px 40px;
-          display: flex;
-          justify-content: space-between;
-          font-size: 8pt;
-          color: #94a3b8;
-          border-top: 1px solid #f1f5f9;
-        }
-        .editor-input {
-          width: 100%;
-          background: #27272a;
-          border: 1px solid #3f3f46;
-          padding: 10px;
-          border-radius: 6px;
-          font-size: 0.875rem;
-          color: white;
-          outline: none;
-          transition: border-color 0.2s;
-        }
-        .editor-input:focus {
-          border-color: #3b82f6;
         }
         @media print {
-          @page {
-            size: A4;
-            margin: 0;
-          }
-          body {
-            background: white;
-          }
           .a4-page {
             box-shadow: none;
             margin: 0;
-            page-break-after: always;
           }
-        }
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
         }
       `}</style>
     </div>
   );
 }
 
-// Sub-component for Project Items to keep the main code clean
-function ProjectItem({
-  project,
-  showDivider,
-}: {
-  project: Project;
-  showDivider: boolean;
-}) {
+function ProjectComp({ project, showDivider }: any) {
   return (
     <div className="mb-6">
       <div className="flex justify-between items-baseline mb-1">
-        <h3 className="text-lg font-bold text-gray-900 leading-tight">
+        <h3 className="text-lg font-bold text-black leading-tight">
           {project.name}
         </h3>
-        <span className="text-[8.5pt] font-bold text-gray-400 whitespace-nowrap ml-4 uppercase">
+        <span className="text-[8pt] font-black text-gray-400 uppercase tracking-tighter whitespace-nowrap ml-4">
           {project.period}
         </span>
       </div>
-
-      {project.location && (
-        <div className="text-[9pt] font-bold text-gray-500 mb-1 flex items-center gap-1">
-          <Briefcase size={12} /> {project.location}
-        </div>
-      )}
-
       {project.link && (
         <a
           href={project.link}
           target="_blank"
-          className="text-[#0070f3] text-[9pt] font-bold hover:underline flex items-center gap-1 mb-1"
+          style={{ color: "#0070f3" }}
+          className="text-[9pt] font-bold underline flex items-center gap-1 mb-1 italic"
         >
           <Globe size={11} /> {project.link}
         </a>
       )}
-
       {project.subtitle && (
         <p className="text-[10pt] font-bold italic text-gray-600 mb-2 border-l-2 border-blue-100 pl-2">
           {project.subtitle}
         </p>
       )}
-
       <ul className="list-disc ml-4 text-[9.5pt] space-y-1 text-gray-700 leading-snug">
-        {project.details.map((detail, i) => (
+        {project.details.map((detail: string, i: number) => (
           <li key={i}>{detail}</li>
         ))}
       </ul>
-
       {showDivider && (
         <div className="mt-5 border-b border-dotted border-gray-300" />
       )}
