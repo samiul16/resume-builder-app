@@ -23,7 +23,7 @@ export default function ResumeBuilder() {
 
   const [data, setData] = useState({
     name: "SAMIUL ISLAM",
-    title: "Experienced Backend & Full Stack Developer",
+    title: "Experienced Full Stack Developer",
     phone: "+8801601076098",
     email: "samiul.saad@gmail.com",
     linkedin: "https://linkedin.com/in/samiul-islam",
@@ -265,10 +265,10 @@ export default function ResumeBuilder() {
       <main className="flex-1 bg-zinc-800 p-8 overflow-y-auto flex flex-col items-center">
         <div ref={componentRef} className="flex flex-col gap-0">
           {/* PAGE 1 */}
-          <div className="a4-page bg-white text-gray-800 shadow-2xl flex flex-col">
-            <header className="bg-slate-50 p-10 flex justify-between items-start border-b-2 border-slate-200">
+          <div className="a4-page bg-white text-white shadow-2xl flex flex-col">
+            <header className="bg-[#0d0c22] p-10 flex justify-between items-start border-b-2 border-gray-200">
               <div className="flex-1">
-                <h1 className="text-4xl font-[900] text-black tracking-tight">
+                <h1 className="text-4xl font-[900] text-white tracking-tight">
                   {data.name}
                 </h1>
                 <p
@@ -278,38 +278,43 @@ export default function ResumeBuilder() {
                   {data.title}
                 </p>
 
-                <div className="grid grid-cols-2 gap-x-6 gap-y-2 mt-6 text-[9.5pt] text-gray-600">
-                  <span className="flex items-center gap-2">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2 mt-6 text-[9.5pt] text-gray-300">
+                  <span className="flex items-center gap-1">
                     <Phone size={12} style={{ color: "#0070f3" }} />{" "}
                     {data.phone}
                   </span>
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-1">
                     <Mail size={12} style={{ color: "#0070f3" }} /> {data.email}
                   </span>
                   <a
                     href={data.linkedin}
                     target="_blank"
-                    className="text-blue-600 font-bold underline"
+                    className="flex items-center gap-1 text-blue-600 font-bold underline"
                   >
-                    <Linkedin size={12} /> LinkedIn
+                    <Linkedin size={12} />
+                    <span>LinkedIn</span>
                   </a>
-                  <span className="flex items-center gap-2">
+
+                  <span className="flex items-center gap-1">
                     <MapPin size={12} style={{ color: "#0070f3" }} />{" "}
                     {data.location}
                   </span>
                   <a
                     href={data.github1}
                     target="_blank"
-                    className="text-blue-600 font-bold underline"
+                    className="flex items-center gap-1 text-blue-600 font-bold underline"
                   >
-                    <Github size={12} /> {data.github1}
+                    <Github size={12} />
+                    <span>{data.github1}</span>
                   </a>
+
                   <a
                     href={data.github2}
                     target="_blank"
-                    className="text-blue-600 font-bold underline"
+                    className="flex items-center gap-1 text-blue-600 font-bold underline"
                   >
-                    <Github size={12} /> {data.github2}
+                    <Github size={12} />
+                    <span>{data.github2}</span>
                   </a>
                 </div>
               </div>
@@ -401,7 +406,6 @@ export default function ResumeBuilder() {
 
           {/* PAGE 2 */}
           <div className="a4-page bg-white text-gray-800 p-10 flex flex-col">
-            <h2 className="section-title">Projects (Continued)</h2>
             <div className="space-y-6">
               {projects.slice(3).map((p, i) => (
                 <ProjectComp
@@ -426,8 +430,8 @@ export default function ResumeBuilder() {
           font-size: 1.25rem;
           font-weight: 900;
           text-transform: uppercase;
-          color: #000;
-          border-bottom: 3px solid #000;
+          color: #616161;
+          border-bottom: 2px solid #616161;
           padding-bottom: 4px;
           margin-bottom: 1rem;
         }
