@@ -23,7 +23,7 @@ export default function ResumeBuilder() {
 
   const [data, setData] = useState({
     name: "SAMIUL ISLAM",
-    title: "Experienced Full Stack Developer",
+    title: "Full Stack Developer",
     phone: "+8801601076098",
     email: "samiul.saad@gmail.com",
     linkedin: "https://linkedin.com/in/samiul-islam",
@@ -31,13 +31,15 @@ export default function ResumeBuilder() {
     github2: "https://github.com/saad85",
     location: "Mirpur-12, Dhaka, Bangladesh",
     summary:
-      "I am an experienced **Backend & Full Stack Developer** with **5+ years of experience** and a strong background in leading development teams and delivering successful projects. My core expertise is in **JavaScript, Node js, React js** and its ecosystems, with additional experience in **Golang and Python**.",
+      "I am an experienced **Full Stack Developer** with **5+ years of experience** and a strong background in leading development teams and delivering successful projects. My core expertise is in **JavaScript, Node js, Next js, React js** and its ecosystems, with additional experience in **Golang and Python**.",
     skills: [
       "Node.js",
       "Express.js",
-      "Meteor.js",
       "Next.js",
+      "React.js",
+      "Golang",
       "Vue.js",
+      "Meteor.js",
       "Python",
       "PostgreSQL",
       "MongoDB",
@@ -139,29 +141,31 @@ export default function ResumeBuilder() {
   const experience = [
     {
       title: "Full Stack Developer",
-      company: "Aimsbay IT Solutions",
-      period: "03/2025 - Present",
+      company: "MegaTecs",
+      period: "04/2025 - Present",
       bullets: [
         "Contributed as a full-stack developer.",
         "Developed and delivered multiple frontend and backend products.",
+        "Technologies: Next.js, React, Node.js, Express.js, PostgreSQL, Sequelize ORM, AWS Services",
       ],
     },
     {
-      title: "Back End Developer",
+      title: "Back End Developer, Team Lead",
       company: "Gain Solutions Ltd",
-      period: "03/2020 - 01/2025",
+      period: "03/2021 - 01/2025",
       bullets: [
         "Developed and optimized backend services.",
-        "Worked on key modules and system enhancements.",
+        "Worked on key modules and system enhancements. Designed database schemas and optimized queries.",
+        "Technologies: Node.js, Express.js, GraphQL, PostgreSQL, Sequelize ORM, AWS Services",
       ],
     },
     {
-      title: "Team Lead",
+      title: "Full Stack Developer",
       company: "Gain Solutions Ltd",
-      period: "02/2023 - 01/2024",
+      period: "01/2019 - 01/2021",
       bullets: [
-        "Led backend development team.",
-        "Focused on high-performance architecture and scalability.",
+        "Developed and maintained core functionalities with Vue.js and Meteor.js.",
+        "Built and maintained key features for the partner application.",
       ],
     },
   ];
@@ -176,23 +180,26 @@ export default function ResumeBuilder() {
 
       for (let i = 0; i < pages.length; i++) {
         const canvas = await html2canvas(pages[i] as HTMLElement, {
-          scale: 3,
+          scale: 2, // Reduced from 3 to 2 (still looks sharp on print, but much smaller)
           useCORS: true,
           allowTaint: true,
           backgroundColor: "#ffffff",
-          width: 794, // Fixed A4 width in pixels at 96 DPI
-          height: 1123,
         });
 
-        const imgData = canvas.toDataURL("image/png");
+        // 1. Convert to JPEG instead of PNG
+        // 2. Set quality to 0.75 (75%)
+        const imgData = canvas.toDataURL("image/jpeg", 0.75);
+
         if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, 0, 210, 297);
+
+        // Use 'FAST' alias and 'JPEG' format for embedding
+        pdf.addImage(imgData, "JPEG", 0, 0, 210, 297, undefined, "FAST");
       }
 
       pdf.save(`${data.name.replace(/\s+/g, "_")}_Resume.pdf`);
     } catch (error) {
       console.error(error);
-      alert("Download failed. Check console.");
+      alert("Download failed.");
     } finally {
       setIsDownloading(false);
     }
@@ -268,12 +275,12 @@ export default function ResumeBuilder() {
           <div className="a4-page bg-white text-white shadow-2xl flex flex-col">
             <header className="bg-[#0d0c22] p-10 flex justify-between items-start border-b-2 border-gray-200">
               <div className="flex-1">
-                <h1 className="text-4xl font-[900] text-white tracking-tight">
+                <h1 className="text-4xl font-semibold text-white tracking-tight">
                   {data.name}
                 </h1>
                 <p
                   style={{ color: "#0070f3" }}
-                  className="text-xl font-extrabold mt-1 uppercase tracking-wider"
+                  className="text-lg font-semibold mt-1 uppercase tracking-wider"
                 >
                   {data.title}
                 </p>
@@ -289,7 +296,7 @@ export default function ResumeBuilder() {
                   <a
                     href={data.linkedin}
                     target="_blank"
-                    className="flex items-center gap-1 text-blue-600 font-bold underline"
+                    className="flex items-center gap-1 text-gray-300 font-bold underline"
                   >
                     <Linkedin size={12} />
                     <span>LinkedIn</span>
@@ -302,7 +309,7 @@ export default function ResumeBuilder() {
                   <a
                     href={data.github1}
                     target="_blank"
-                    className="flex items-center gap-1 text-blue-600 font-bold underline"
+                    className="flex items-center gap-1 text-gray-300 font-bold underline"
                   >
                     <Github size={12} />
                     <span>{data.github1}</span>
@@ -311,7 +318,7 @@ export default function ResumeBuilder() {
                   <a
                     href={data.github2}
                     target="_blank"
-                    className="flex items-center gap-1 text-blue-600 font-bold underline"
+                    className="flex items-center gap-1 text-gray-300 font-bold underline"
                   >
                     <Github size={12} />
                     <span>{data.github2}</span>
@@ -319,11 +326,11 @@ export default function ResumeBuilder() {
                 </div>
               </div>
               {profileImg && (
-                <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden shrink-0 ml-6">
+                <div className="w-40 h-40 rounded-full border-4 border-white shadow-lg overflow-hidden shrink-0 ml-6">
                   <img
                     src={profileImg}
                     alt="Profile"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full  object-cover"
                   />
                 </div>
               )}
@@ -359,7 +366,7 @@ export default function ResumeBuilder() {
               {/* RIGHT COL */}
               <div className="col-span-5 space-y-8 border-l border-gray-100 pl-4">
                 <section>
-                  <h2 className="section-title">Experience</h2>
+                  <h2 className="section-title">Experience: 5+ years</h2>
                   {experience.map((exp, i) => (
                     <div key={i} className="mb-6">
                       <h3 className="text-lg font-bold text-black leading-tight">
