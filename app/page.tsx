@@ -154,7 +154,6 @@ export default function ResumeBuilder() {
       company: "Gain Solutions Ltd",
       period: "03/2021 - 01/2025",
       bullets: [
-        "Developed and optimized backend services.",
         "Worked on key modules and system enhancements. Designed database schemas and optimized queries.",
         "Technologies: Node.js, Express.js, GraphQL, PostgreSQL, Sequelize ORM, AWS Services",
       ],
@@ -267,10 +266,9 @@ export default function ResumeBuilder() {
           />
         </div>
       </aside>
-
       {/* PREVIEW AREA */}
       <main className="flex-1 bg-zinc-800 p-8 overflow-y-auto flex flex-col items-center">
-        <div ref={componentRef} className="flex flex-col gap-0">
+        <div ref={componentRef} className="flex flex-col gap-4">
           {/* PAGE 1 */}
           <div className="a4-page bg-white text-white shadow-2xl flex flex-col">
             <header className="bg-[#0d0c22] p-10 flex justify-between items-start border-b-2 border-gray-200">
@@ -301,7 +299,6 @@ export default function ResumeBuilder() {
                     <Linkedin size={12} />
                     <span>LinkedIn</span>
                   </a>
-
                   <span className="flex items-center gap-1">
                     <MapPin size={12} style={{ color: "#0070f3" }} />{" "}
                     {data.location}
@@ -312,16 +309,15 @@ export default function ResumeBuilder() {
                     className="flex items-center gap-1 text-gray-300 font-bold underline"
                   >
                     <Github size={12} />
-                    <span>{data.github1}</span>
+                    <span>GitHub (Primary)</span>
                   </a>
-
                   <a
                     href={data.github2}
                     target="_blank"
                     className="flex items-center gap-1 text-gray-300 font-bold underline"
                   >
                     <Github size={12} />
-                    <span>{data.github2}</span>
+                    <span>GitHub (Secondary)</span>
                   </a>
                 </div>
               </div>
@@ -330,14 +326,14 @@ export default function ResumeBuilder() {
                   <img
                     src={profileImg}
                     alt="Profile"
-                    className="w-full h-full  object-cover"
+                    className="w-full h-full object-cover"
                   />
                 </div>
               )}
             </header>
 
             <div className="p-10 grid grid-cols-12 gap-8 flex-1">
-              {/* LEFT COL */}
+              {/* LEFT COL - Page 1 */}
               <div className="col-span-7 space-y-8">
                 <section>
                   <h2 className="section-title">Summary</h2>
@@ -356,17 +352,19 @@ export default function ResumeBuilder() {
                   </div>
                 </section>
                 <section>
-                  <h2 className="section-title">Projects</h2>
+                  <h2 className="section-title">Key Projects</h2>
+                  {/* Show only first 3 projects on Page 1 */}
                   {projects.slice(0, 3).map((p, i) => (
                     <ProjectComp key={i} project={p} showDivider={i < 2} />
                   ))}
                 </section>
               </div>
 
-              {/* RIGHT COL */}
+              {/* RIGHT COL - Page 1 */}
               <div className="col-span-5 space-y-8 border-l border-gray-100 pl-4">
                 <section>
-                  <h2 className="section-title">Experience: 5+ years</h2>
+                  <h2 className="section-title">Experience</h2>
+                  {/* Show top 2 experiences on Page 1 to save space */}
                   {experience.map((exp, i) => (
                     <div key={i} className="mb-6">
                       <h3 className="text-lg font-bold text-black leading-tight">
@@ -386,12 +384,36 @@ export default function ResumeBuilder() {
                           <li key={bi}>{b}</li>
                         ))}
                       </ul>
-                      {i < experience.length - 1 && (
+                      {i < 1 && (
                         <div className="mt-4 border-b border-dotted border-gray-200" />
                       )}
                     </div>
                   ))}
                 </section>
+              </div>
+            </div>
+          </div>
+
+          {/* PAGE 2 */}
+          <div className="a4-page bg-white text-gray-800 p-10 flex flex-col">
+            <div className="grid grid-cols-12 gap-8 flex-1">
+              {/* LEFT COL - Page 2 */}
+              <div className="col-span-7 space-y-6">
+                <section>
+                  <h2 className="section-title">More Projects</h2>
+                  {/* Show remaining projects */}
+                  {projects.slice(3).map((p, i) => (
+                    <ProjectComp
+                      key={i}
+                      project={p}
+                      showDivider={i < projects.slice(3).length - 1}
+                    />
+                  ))}
+                </section>
+              </div>
+
+              {/* RIGHT COL - Page 2 */}
+              <div className="col-span-5 space-y-8 border-l border-gray-100 pl-4">
                 <section>
                   <h2 className="section-title">Education</h2>
                   <h3 className="font-bold text-black text-[10pt]">
@@ -410,22 +432,8 @@ export default function ResumeBuilder() {
               </div>
             </div>
           </div>
-
-          {/* PAGE 2 */}
-          <div className="a4-page bg-white text-gray-800 p-10 flex flex-col">
-            <div className="space-y-6">
-              {projects.slice(3).map((p, i) => (
-                <ProjectComp
-                  key={i}
-                  project={p}
-                  showDivider={i < projects.slice(3).length - 1}
-                />
-              ))}
-            </div>
-          </div>
         </div>
       </main>
-
       <style jsx global>{`
         .a4-page {
           width: 794px;
