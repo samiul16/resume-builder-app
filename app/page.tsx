@@ -25,7 +25,7 @@ export default function ResumeBuilder() {
     title: "Full Stack Developer",
     phone: "+8801601076098",
     email: "samiul.saad@gmail.com",
-    linkedin: "linkedin.com/in/samiul-islam",
+    linkedin: "https://www.linkedin.com/in/samiul-islam-7a66211b8/",
     github1: "github.com/samiul16",
     github2: "github.com/saad85",
     location: "Dhaka, Bangladesh",
